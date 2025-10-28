@@ -10,7 +10,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Signup App',
+      title: 'Fun Signup App',
       theme: ThemeData(
         useMaterial3: true,
         colorSchemeSeed: Colors.purple,
@@ -45,8 +45,13 @@ class _SignupPageState extends State<SignupPage> {
 
   void _submit() {
     if (_formKey.currentState?.validate() ?? false) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Signup successful!')),
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => WelcomeScreen(
+            name: _nameController.text.trim(),
+            avatarEmoji: '😊',
+          ),
+        ),
       );
     }
   }
@@ -59,9 +64,7 @@ class _SignupPageState extends State<SignupPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Join Us Today for the Cash Money!'),
-      ),
+      appBar: AppBar(title: const Text('Join Us Today for the Cash Money!')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -116,6 +119,31 @@ class _SignupPageState extends State<SignupPage> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class WelcomeScreen extends StatefulWidget {
+  final String name;
+  final String avatarEmoji;
+  const WelcomeScreen({super.key, required this.name, required this.avatarEmoji});
+
+  @override
+  State<WelcomeScreen> createState() => _WelcomeScreenState();
+}
+
+class _WelcomeScreenState extends State<WelcomeScreen> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Welcome')),
+      body: Center(
+        child: Text(
+          'Welcome, ${widget.name}!',
+          style: Theme.of(context).textTheme.headlineMedium,
+          textAlign: TextAlign.center,
         ),
       ),
     );
