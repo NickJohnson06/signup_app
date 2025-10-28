@@ -34,6 +34,9 @@ class _SignupPageState extends State<SignupPage> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
 
+  final List<String> _avatars = const ['🤑', '🚀', '👽', '👹', '🤖'];
+  String _selectedAvatar = '🤑';
+
   @override
   void dispose() {
     _nameController.dispose();
@@ -49,7 +52,7 @@ class _SignupPageState extends State<SignupPage> {
         MaterialPageRoute(
           builder: (_) => WelcomeScreen(
             name: _nameController.text.trim(),
-            avatarEmoji: '😊',
+            avatarEmoji: _selectedAvatar,
           ),
         ),
       );
@@ -112,6 +115,20 @@ class _SignupPageState extends State<SignupPage> {
                       : 'Passwords do not match';
                 },
               ),
+              const SizedBox(height: 20),
+              Text('Pick an avatar', style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                children: _avatars.map((e) {
+                  final selected = _selectedAvatar == e;
+                  return ChoiceChip(
+                    label: Text(e, style: const TextStyle(fontSize: 18)),
+                    selected: selected,
+                    onSelected: (_) => setState(() => _selectedAvatar = e),
+                  );
+                }).toList(),
+              ),
               const SizedBox(height: 24),
               FilledButton(
                 onPressed: _submit,
@@ -137,13 +154,17 @@ class WelcomeScreen extends StatefulWidget {
 class _WelcomeScreenState extends State<WelcomeScreen> {
   @override
   Widget build(BuildContext context) {
+    final title = 'Welcome, ${widget.name}!';
     return Scaffold(
       appBar: AppBar(title: const Text('Welcome')),
       body: Center(
-        child: Text(
-          'Welcome, ${widget.name}!',
-          style: Theme.of(context).textTheme.headlineMedium,
-          textAlign: TextAlign.center,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(widget.avatarEmoji, style: const TextStyle(fontSize: 72)),
+            const SizedBox(height: 16),
+            Text(title, style: Theme.of(context).textTheme.headlineMedium, textAlign: TextAlign.center),
+          ],
         ),
       ),
     );
