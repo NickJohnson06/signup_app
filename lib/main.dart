@@ -151,13 +151,64 @@ class WelcomeScreen extends StatefulWidget {
   State<WelcomeScreen> createState() => _WelcomeScreenState();
 }
 
-class _WelcomeScreenState extends State<WelcomeScreen> {
+class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProviderStateMixin {
+  bool _celebrating = true;
+  late final AnimationController _controller;
+  late final Animation<double> _scale;
+  late final Animation<double> _fade;
+
   @override
-  Widget build(BuildContext context) {
+  void initState() {
+    super.initState();
+
+    // After 2 seconds, end celebration and start fade+scale for content
+    Future.delayed(const Duration(seconds: 2), () {
+      if (mounted) setState(() => _celebrating = false);
+      _controller.forward(from: 0);
+    });
+
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 700),
+    );
+    _scale = Tween<double>(begin: 0.9, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
+    );
+    _fade = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Widget _celebration() {
+    // Confetti using big emojis that fade out
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+      Center(child: Text('🎉', style: TextStyle(fontSize: MediaQuery.of(context).size.shortestSide * 0.3))),
+      Align(alignment: const Alignment(-0.8, -0.6), child: const Text('✨', style: TextStyle(fontSize: 48))),
+      Align(alignment: const Alignment(0.9, -0.2), child: const Text('🎊', style: TextStyle(fontSize: 44))),
+      Align(alignment: const Alignment(-0.3, 0.7), child: const Text('🥳', style: TextStyle(fontSize: 52))),
+      Align(alignment: const Alignment(0.6, 0.8), child: const Text('🎈', style: TextStyle(fontSize: 46))),
+      Align(alignment: const Alignment(-0.9, 0.2), child: const Text('💥', style: TextStyle(fontSize: 50))),
+      Align(alignment: const Alignment(0.3, -0.8), child: const Text('💫', style: TextStyle(fontSize: 42))),
+      Align(alignment: const Alignment(-0.6, -0.2), child: const Text('🎇', style: TextStyle(fontSize: 40))),
+      Align(alignment: const Alignment(0.7, 0.4), child: const Text('🎆', style: TextStyle(fontSize: 48))),
+      ],
+    );
+  }
+
+  Widget _content() {
     final title = 'Welcome, ${widget.name}!';
-    return Scaffold(
-      appBar: AppBar(title: const Text('Welcome')),
-      body: Center(
+    return FadeTransition(
+      opacity: _fade,
+      child: ScaleTransition(
+        scale: _scale,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -165,6 +216,19 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
             const SizedBox(height: 16),
             Text(title, style: Theme.of(context).textTheme.headlineMedium, textAlign: TextAlign.center),
           ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Welcome')),
+      body: Center(
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 400),
+          child: _celebrating ? _celebration() : _content(),
         ),
       ),
     );
